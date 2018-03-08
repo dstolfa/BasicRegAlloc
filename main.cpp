@@ -73,8 +73,10 @@ public:
   /// Used to dump the adjacency matrix
   void logGraph() const {
     for (std::size_t i = 0; i < adjMatrix.size(); i++) {
+      std::clog << "Element " << i + 1 << ": ";
       for (std::size_t j = 0; j < adjMatrix[i].size(); j++) {
-        std::clog << adjMatrix[i][j] << " ";
+        if (adjMatrix[i][j] == 1)
+          std::clog << j + 1 << " | ";
       }
       std::clog << std::endl;
     }
@@ -105,7 +107,7 @@ public:
         auto minused = std::distance(
             tempWeight.begin(),
             std::min_element(tempWeight.begin(), tempWeight.end()));
-	tempWeight[minused] = std::numeric_limits<int>::max();
+        tempWeight[minused] = std::numeric_limits<int>::max();
         s.push(std::make_pair(minused, true)); // true == spilled
         std::clog << "Pushing: " << minused + 1 << " true" << std::endl;
         ind = minused;
@@ -127,10 +129,13 @@ public:
     } while (--nodesLeft > 0);
 
     nodesLeft = s.size();
+    std::vector<bool> poppedNodes(adjMatrix.size());
     do {
       auto e = s.top();
       std::clog << "Popping: " << e.first + 1 << std::endl;
       s.pop();
+
+      poppedNodes[e.first] = true;
       // Check if this value needs to be spilled. If so, we use -1 to denote a
       // spill. Otherwise, we look at its neighbours and decide to colour it
       // with the first colour available in the set that contains the set
@@ -140,12 +145,13 @@ public:
         res[e.first] = std::make_pair(e.first, -1);
       } else {
         std::vector<int> cSet;
-        for (int i = nodesLeft; i > e.first; i--) {
-          if (adjMatrix[e.first][i] == 1) {
+        for (int i = 0; i < poppedNodes.size(); i++) {
+          if (e.first != i && poppedNodes[i] && adjMatrix[e.first][i] == 1) {
             cSet.push_back(res[i].second);
           }
         }
         std::vector<int> colourDiff(allColours.size());
+        std::sort(cSet.begin(), cSet.end());
         std::set_difference(allColours.begin(), allColours.end(), cSet.begin(),
                             cSet.end(),
                             std::inserter(colourDiff, colourDiff.begin()));
@@ -187,6 +193,7 @@ int main(void) {
     }
   }
 
+  g.logGraph();
   auto res = g.colourGraph(in.numberOfPlaces);
 
   for (std::size_t i = 0; i < res.size(); i++) {
