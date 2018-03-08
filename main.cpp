@@ -105,6 +105,7 @@ public:
         auto minused = std::distance(
             tempWeight.begin(),
             std::min_element(tempWeight.begin(), tempWeight.end()));
+	tempWeight[minused] = std::numeric_limits<int>::max();
         s.push(std::make_pair(minused, true)); // true == spilled
         std::clog << "Pushing: " << minused + 1 << " true" << std::endl;
         ind = minused;
@@ -144,7 +145,7 @@ public:
             cSet.push_back(res[i].second);
           }
         }
-        std::vector<int> colourDiff;
+        std::vector<int> colourDiff(allColours.size());
         std::set_difference(allColours.begin(), allColours.end(), cSet.begin(),
                             cSet.end(),
                             std::inserter(colourDiff, colourDiff.begin()));
