@@ -131,7 +131,7 @@ public:
       std::clog << "Popping: " << e.first + 1 << std::endl;
       s.pop();
       // Check if this value needs to be spilled. If so, we use -1 to denote a
-      // spill. Otherwise, we look at its neighbours and decide th colour it
+      // spill. Otherwise, we look at its neighbours and decide to colour it
       // with the first colour available in the set that contains the set
       // difference of neighbouring colours and all colours, as such:
       // allColours \ cSet = colourDiff.
