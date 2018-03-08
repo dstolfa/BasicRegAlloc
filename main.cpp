@@ -28,37 +28,41 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
- 
+
 #include <algorithm>
 #include <iostream>
 #include <stack>
 #include <vector>
 
+/// The Input struct holds an abstraction for the inputs of the allocator
 struct Input {
   std::vector<int> indices;
   std::vector<std::pair<int, int>> liveIntervals;
-  std::vector<int> timesUsed;
+  std::vector<int> weight;
   std::size_t numberOfBuckets;
   std::size_t numberOfPlaces;
 
   void allocateSpace() {
     indices.resize(numberOfBuckets);
     liveIntervals.resize(numberOfBuckets);
-    timesUsed.resize(numberOfBuckets);
+    weight.resize(numberOfBuckets);
   }
 };
 
+/// The ClashGraph structure holds the information necessary to do register
+/// allocation. Subject to change.
 struct ClashGraph {
 private:
   std::vector<std::vector<int>> adjMatrix;
   std::vector<std::size_t> deg;
-  std::vector<int> timesUsed;
+  std::vector<int> weight;
 
 public:
-  ClashGraph(std::size_t _matSize, std::vector<int> &tu)
+  ClashGraph(std::size_t _matSize, std::vector<int> &w)
       : adjMatrix(_matSize, std::vector<int>(_matSize)), deg(_matSize),
-        timesUsed(tu) {}
+        weight(w) {}
 
+  /// Adds an edge to the clash graph and maintains degree
   void addEdge(int n1, int n2) {
     adjMatrix[n1 - 1][n2 - 1] = 1;
     adjMatrix[n2 - 1][n1 - 1] = 1;
@@ -66,6 +70,7 @@ public:
     deg[n2 - 1]++;
   }
 
+  /// Used to dump the adjacency matrix
   void logGraph() const {
     for (std::size_t i = 0; i < adjMatrix.size(); i++) {
       for (std::size_t j = 0; j < adjMatrix[i].size(); j++) {
@@ -75,36 +80,48 @@ public:
     }
   }
 
+  /// Returns the result in the format of { (id, register), ... }
   std::vector<std::pair<int, int>> colourGraph(std::size_t k) const {
-    std::stack<std::pair<int, bool>> s;
-    std::vector<int> allColours(k);
-    std::vector<std::pair<int, int>> res(adjMatrix.size());
-    std::vector<std::size_t> tempDeg(deg);
-    std::vector<int> tempTU(timesUsed);
-    std::size_t nodesLeft = adjMatrix.size();
+    std::stack<std::pair<int, bool>> s; // The stack used for the heuristic
+    std::vector<int> allColours(k);     // All of the possible colours
+    std::vector<std::pair<int, int>> res(adjMatrix.size()); // Result
+    std::vector<std::size_t> tempDeg(deg);    // A copy of degrees, will change
+    std::vector<int> tempWeight(weight);      // A copy of weight, will change
+    std::size_t nodesLeft = adjMatrix.size(); // Num of nodes to process
 
     std::generate(allColours.begin(), allColours.end(),
                   [n = 0]() mutable { return n++; });
 
     do {
+      // Get the minimal degree
       auto ind = std::distance(
           tempDeg.begin(), std::min_element(tempDeg.begin(), tempDeg.end()));
+      // If the minimal degree is greater or equal to the amount of colours
+      // we're trying to colour the graph with, we need to spill. Our spilling
+      // heuristic is the one with the minimum weight. Otherwise, we simply
+      // place the node with the minimal degree on the stack and leave it to be
+      // dealt with later on.
       if (tempDeg[ind] >= k) {
         auto minused = std::distance(
-            tempTU.begin(), std::min_element(tempTU.begin(), tempTU.end()));
-        s.push(std::make_pair(minused, true));
+            tempWeight.begin(),
+            std::min_element(tempWeight.begin(), tempWeight.end()));
+        s.push(std::make_pair(minused, true)); // true == spilled
         std::clog << "Pushing: " << minused + 1 << " true" << std::endl;
         ind = minused;
       } else {
-        s.push(std::make_pair(ind, false));
+        s.push(std::make_pair(ind, false)); // false == not spilled
         std::clog << "Pushing: " << ind + 1 << " false" << std::endl;
       }
 
+      // Update the degree of each node in the graph after we've "removed" the
+      // current node.
       for (std::size_t i = 0; i < adjMatrix.size(); i++) {
         if (adjMatrix[i][ind] == 1) {
           tempDeg[i]--;
         }
       }
+      // Set the degree to the maximal value as a workaround. Needs to be done
+      // in a better way, but this will do initially.
       tempDeg[ind] = std::numeric_limits<std::size_t>::max();
     } while (--nodesLeft > 0);
 
@@ -113,6 +130,11 @@ public:
       auto e = s.top();
       std::clog << "Popping: " << e.first + 1 << std::endl;
       s.pop();
+      // Check if this value needs to be spilled. If so, we use -1 to denote a
+      // spill. Otherwise, we look at its neighbours and decide th colour it
+      // with the first colour available in the set that contains the set
+      // difference of neighbouring colours and all colours, as such:
+      // allColours \ cSet = colourDiff.
       if (e.second == true) {
         res[e.first] = std::make_pair(e.first, -1);
       } else {
@@ -126,8 +148,8 @@ public:
         std::set_difference(allColours.begin(), allColours.end(), cSet.begin(),
                             cSet.end(),
                             std::inserter(colourDiff, colourDiff.begin()));
-        for (std::size_t i = 0; i < colourDiff.size(); i++)
-          res[e.first] = std::make_pair(e.first, colourDiff[0]);
+        // We have our colour now, update our resulting vector.
+        res[e.first] = std::make_pair(e.first, colourDiff[0]);
       }
     } while (--nodesLeft > 0);
 
@@ -152,10 +174,10 @@ int main(void) {
     currentMax = std::max(currentMax, in.indices[i]);
     std::cin >> in.liveIntervals[i].first;
     std::cin >> in.liveIntervals[i].second;
-    std::cin >> in.timesUsed[i];
+    std::cin >> in.weight[i];
   }
 
-  ClashGraph g(currentMax, in.timesUsed);
+  ClashGraph g(currentMax, in.weight);
 
   for (std::size_t i = 0; i < in.numberOfBuckets; i++) {
     for (std::size_t j = i + 1; j < in.numberOfBuckets; j++) {
