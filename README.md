@@ -21,6 +21,39 @@ None of the code here should be relied on staying the same and is currently
 intended as a standalone allocator that takes the in-order indices of virtual
 registers (SSA or non-SSA), live ranges and weights.
 
+## Structure of the code
+
+The current tree of the code is as follows:
+
+```
+.
+├── README.md
+├── examples
+│   ├── example1
+│   │   ├── main.cpp
+│   │   ├── meson.build
+│   │   ├── testfile
+│   │   ├── testfile2
+│   │   └── testfile3
+│   └── meson.build
+├── lib
+│   ├── BasicRegAlloc.cpp
+│   ├── BasicRegAlloc.h
+│   └── meson.build
+└── meson.build
+```
+
+The `lib` subdirectory contains the register allocation library. This is meant
+to be as simple as possible of a library that provides the functionality of
+register allocation in a straightforward way and is intended to be very
+lightweight. In order to use it, include `BasicRegAlloc.h` in your source file
+and link against the library. The graph colouring is done in
+`BasicRegAlloc.cpp` as described in the explanation section.
+
+The `examples` subdirectory contains various example programs built on the
+library with various sample inputs for those programs. These are all built by
+default and can be run from the command line for experimentation.
+
 ## Build
 
 This currently uses the [meson](http://mesonbuild.com) build system to achieve
