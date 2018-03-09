@@ -34,6 +34,12 @@
 #include <stack>
 #include <vector>
 
+static bool debug = false;
+
+#define CLOG(x)                                                                \
+  if (debug)                                                                   \
+    std::clog << x;
+
 /// The Input struct holds an abstraction for the inputs of the allocator
 struct Input {
   std::vector<int> indices;
@@ -73,12 +79,12 @@ public:
   /// Used to dump the adjacency matrix
   void logGraph() const {
     for (std::size_t i = 0; i < adjMatrix.size(); i++) {
-      std::clog << "Element " << i + 1 << ": ";
+      CLOG("Element " << i + 1 << ": ");
       for (std::size_t j = 0; j < adjMatrix[i].size(); j++) {
         if (adjMatrix[i][j] == 1)
-          std::clog << j + 1 << " | ";
+          CLOG(j + 1 << " | ");
       }
-      std::clog << std::endl;
+      CLOG(std::endl);
     }
   }
 
@@ -109,11 +115,11 @@ public:
             std::min_element(tempWeight.begin(), tempWeight.end()));
         tempWeight[minused] = std::numeric_limits<int>::max();
         s.push(std::make_pair(minused, true)); // true == spilled
-        std::clog << "Pushing: " << minused + 1 << " true" << std::endl;
+        CLOG("Pushing: " << minused + 1 << " true" << std::endl);
         ind = minused;
       } else {
         s.push(std::make_pair(ind, false)); // false == not spilled
-        std::clog << "Pushing: " << ind + 1 << " false" << std::endl;
+        CLOG("Pushing: " << ind + 1 << " false" << std::endl);
       }
 
       // Update the degree of each node in the graph after we've "removed" the
@@ -132,7 +138,7 @@ public:
     std::vector<bool> poppedNodes(adjMatrix.size());
     do {
       auto e = s.top();
-      std::clog << "Popping: " << e.first + 1 << std::endl;
+      CLOG("Popping: " << e.first + 1 << std::endl);
       s.pop();
 
       poppedNodes[e.first] = true;
