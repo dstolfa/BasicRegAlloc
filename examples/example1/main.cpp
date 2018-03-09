@@ -31,9 +31,7 @@
 
 #include "lib/BasicRegAlloc.h"
 
-#include <algorithm>
 #include <iostream>
-#include <stack>
 #include <vector>
 
 /// The Input struct holds an abstraction for the inputs of the allocator
