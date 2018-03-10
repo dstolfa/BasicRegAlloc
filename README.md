@@ -21,6 +21,14 @@ None of the code here should be relied on staying the same and is currently
 intended as a standalone allocator that takes the in-order indices of virtual
 registers (SSA or non-SSA), live ranges and weights.
 
+Things to note about this particular register allocator is that it is an eager
+one when it comes to reusing registers. That means that it will produce
+dependencies between different instructions as they have been generated and in
+pipelined implementations cause stalls. The assumption here is that the hardware
+provides a sufficient amount of registers to be able to perform instruction
+scheduling in the hardware itself even if there are dependencies between
+instructions that reuse registers and seemingly cause a stall.
+
 ## Structure of the code
 
 The current tree of the code is as follows:
