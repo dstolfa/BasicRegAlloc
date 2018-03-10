@@ -52,7 +52,9 @@ and link against the library. The graph colouring is done in
 
 The `examples` subdirectory contains various example programs built on the
 library with various sample inputs for those programs. These are all built by
-default and can be run from the command line for experimentation.
+default and can be run from the command line for experimentation. Each example
+has its own self-contained `README.md` that explains the purpose of the example
+and how it operates.
 
 ## Build
 
@@ -68,3 +70,9 @@ meson builddir --buildtype (plain|debug|debugoptimized|release)
 This will generate a ninja file in builddir, which can be run to compile the
 program. This code is written in C++14 and will not build without a compiler
 that supports it.
+
+## Usage
+
+When you've built the library and the examples, you can run each example
+individually. Currently, there are no tests written for the allocator so issuing
+`ninja test` won't do anything.
