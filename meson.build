@@ -8,6 +8,7 @@ inc = include_directories('.')
 
 subdir('lib')
 subdir('examples')
+subdir('tests')
 
 pkg_mod = import('pkgconfig')
 pkg_mod.generate(libraries : BasicRegAlloc_lib,
