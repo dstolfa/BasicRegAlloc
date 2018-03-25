@@ -1,7 +1,7 @@
 project('BasicRegAlloc', 'cpp',
         version : '0.1.0',
         license : 'BSD 2-clause',
-        default_options : ['cpp_std=c++14'])
+        default_options : ['cpp_std=c++17'])
 
 add_global_arguments(language : 'cpp')
 inc = include_directories('.')
