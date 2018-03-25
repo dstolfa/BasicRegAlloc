@@ -27,9 +27,9 @@ bool OverlapPolicy::verify(BasicRegisterAllocTest<OverlapPolicy> *test,
         message += ")> have been allocated to <";
         message += res[i].second;
         message += ">";
-        return 1;
+        return false;
       }
-  return 0;
+  return true;
 }
 
 bool OverlapPolicy::report(std::string_view message) const {

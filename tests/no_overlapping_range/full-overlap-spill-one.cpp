@@ -14,10 +14,14 @@ namespace fs = std::experimental::filesystem;
 /// the lowest weight), however we do not test for that particularl property in
 /// this test.
 int main(void) {
-  fs::path p = "../inputs/1";
+  fs::path p = "../tests/inputs/1";
   BasicRegisterAllocTest<OverlapPolicy> test;
   test.setNumberOfPhysicalRegisters(2);
-  test.loadFile(fs::absolute(p).string());
+  if (!test.loadFile(fs::absolute(p).string())) {
+    std::cerr << "Failed to load the test file\n";
+    return 1;
+  }
+
   if (!test.run())
     return 1;
   return 0;
