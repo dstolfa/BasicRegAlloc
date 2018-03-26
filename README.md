@@ -35,20 +35,34 @@ The current tree of the code is as follows:
 
 ```
 .
-├── README.md
 ├── examples
 │   ├── example1
 │   │   ├── main.cpp
 │   │   ├── meson.build
+│   │   ├── README.md
 │   │   ├── testfile
 │   │   ├── testfile2
 │   │   └── testfile3
+│   │   ...
 │   └── meson.build
 ├── lib
 │   ├── BasicRegAlloc.cpp
 │   ├── BasicRegAlloc.h
 │   └── meson.build
-└── meson.build
+├── meson.build
+├── README.md
+└── tests
+    ├── BasicRegisterAllocTest.h
+    ├── inputs
+    │   └── 1
+    │       ...
+    ├── meson.build
+    └── no_overlapping_range
+        ├── full-overlap-spill-one.cpp
+        ├── meson.build
+        ├── OverlapPolicy.cpp
+        └── OverlapPolicy.h
+    ...
 ```
 
 The `lib` subdirectory contains the register allocation library. This is meant
@@ -64,11 +78,21 @@ default and can be run from the command line for experimentation. Each example
 has its own self-contained `README.md` that explains the purpose of the example
 and how it operates.
 
+All of the tests are located in the `tests` subdirectory. The tests are
+organised in such a way that only a single property is checked with the tests in
+each subdirectory under `tests`. This would mean that `no_overlapping_range`
+tests whether or not any two or more virtual registers are allocated to the same
+physical register at the same time even though their live ranges overlap.
+`BasicRegisterAllocTest.h` implements a generic testing interface for
+`BasicRegAlloc`, while the policy sources in each subdirectory implement the
+verification and error reporting code. These two primitives should be used to
+develop all of the future tests.
+
 ## Build
 
 This currently uses the [meson](http://mesonbuild.com) build system to achieve
 simplicity of configuration and build files themselves. Meson is supported on
-many major operating systems, including FreeBSD, Mac OS X, Linux and Windows. In
+many major operating systems, including FreeBSD, macOS, Linux and Windows. In
 order to build the allocator, install meson and issue:
 
 ```
@@ -76,11 +100,13 @@ meson builddir --buildtype (plain|debug|debugoptimized|release)
 ```
 
 This will generate a ninja file in builddir, which can be run to compile the
-program. This code is written in C++14 and will not build without a compiler
-that supports it.
+program. This code is written in C++17 and will not build without a compiler
+that supports it. The build has only been tested with `clang++` and `ld.lld`
+currently on FreeBSD, macOS and Linux. `ld.gold` should work, but `g++` might
+not.
 
 ## Usage
 
 When you've built the library and the examples, you can run each example
-individually. Currently, there are no tests written for the allocator so issuing
-`ninja test` won't do anything.
+individually. In addition to that, running `ninja test` or `meson test` will
+start running all of the tests currently implemented.
