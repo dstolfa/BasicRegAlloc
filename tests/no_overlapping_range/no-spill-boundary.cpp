@@ -38,14 +38,11 @@
 
 namespace fs = std::experimental::filesystem;
 
-/// This test is designed to check the case where we have more virtual registers
-/// than physical registers and where all of the live intervals of the virtual
-/// registers overlap. We expect the registers to be greedily allocated
-/// depending on the weight, as well as a spill of one register (the one with
-/// the lowest weight), however we do not test for that particular property in
-/// this test.
+/// This test is designed to check the case where the live ranges of two virtual
+/// registers are next to eachother, in the sense that one starts where the
+/// other one ends.
 int main(void) {
-  fs::path p = "../tests/inputs/1";
+  fs::path p = "../tests/inputs/2";
   BasicRegisterAllocTest<OverlapPolicy> test;
   test.setNumberOfPhysicalRegisters(2);
   if (!test.loadFile(fs::absolute(p).string())) {
