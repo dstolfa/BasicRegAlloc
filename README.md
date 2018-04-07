@@ -102,8 +102,9 @@ meson builddir --buildtype (plain|debug|debugoptimized|release)
 This will generate a ninja file in builddir, which can be run to compile the
 program. This code is written in C++17 and will not build without a compiler
 that supports it. The build has only been tested with `clang++` and `ld.lld`
-currently on FreeBSD, macOS and Linux. `ld.gold` should work, but `g++` might
-not.
+currently on FreeBSD and Linux. `ld.gold` should work, but `g++` might not.
+Apple's `ld` should also work but `llvm` from [homebrew](https://brew.sh) should
+be used, as `-lstdc++fs` is not supported in Apple's version of `clang`.
 
 ## Usage
 
