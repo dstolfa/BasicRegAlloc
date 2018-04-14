@@ -106,8 +106,15 @@ currently on FreeBSD and Linux. `ld.gold` should work, but `g++` might not.
 Apple's `ld` should also work but `llvm` from [homebrew](https://brew.sh) should
 be used, as `-lstdc++fs` is not supported in Apple's version of `clang`.
 
+In order to build the tests, the following command can be used:
+
+```
+meson -Dbuild_tests=true builddir --buildtype (plain|debug|debugoptimized|release)
+```
+
 ## Usage
 
 When you've built the library and the examples, you can run each example
 individually. In addition to that, running `ninja test` or `meson test` will
-start running all of the tests currently implemented.
+start running all of the tests currently implemented if `-Dbuild_tests=true` was
+specified.
