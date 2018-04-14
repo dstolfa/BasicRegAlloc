@@ -6,9 +6,14 @@ project('BasicRegAlloc', 'cpp',
 add_global_arguments(language : 'cpp')
 inc = include_directories('.')
 
+mk_tests = get_option('build_tests')
+
 subdir('lib')
 subdir('examples')
-subdir('tests')
+
+if mk_tests == true
+  subdir('tests')
+endif
 
 pkg_mod = import('pkgconfig')
 pkg_mod.generate(libraries : BasicRegAlloc_lib,
